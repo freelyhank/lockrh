@@ -72,18 +72,18 @@ const questions = [
 ]
 
 const hardwareLinks = [
-  ['Rail', '/#rail'],
-  ['Time lock', '/#time-lock'],
-  ['Combination', '/#combination'],
-  ['Keys', '/#keys'],
-  ['Master key', '/#master-key']
+  ['Rail', '#rail'],
+  ['Time lock', '#time-lock'],
+  ['Combination', '#combination'],
+  ['Keys', '#keys'],
+  ['Master key', '#master-key']
 ]
 
 const paperworkLinks = [
-  ['Docs', '/docs'],
-  ['Workings', '/#workings'],
-  ['Spec sheet', '/#spec-sheet'],
-  ['Weak points', '/#weak-points']
+  ['Docs', '#/docs'],
+  ['Workings', '#workings'],
+  ['Spec sheet', '#spec-sheet'],
+  ['Weak points', '#weak-points']
 ]
 
 </script>
@@ -92,8 +92,8 @@ const paperworkLinks = [
   <div class="docs-page">
     <header class="site-header">
       <div class="wrap header-inner">
-        <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span><span class="brand-word">lock<span>RH</span></span></a>
-        <nav class="docs-nav"><a href="/"><ArrowLeft :size="16" /> Back to home</a><span>$LORH - Robinhood Chain</span></nav>
+        <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span><span class="brand-word">lock<span>RH</span></span></a>
+        <nav class="docs-nav"><a href="#top"><ArrowLeft :size="16" /> Back to home</a><span>$LORH - Robinhood Chain</span></nav>
       </div>
     </header>
 
@@ -110,7 +110,7 @@ const paperworkLinks = [
         <div class="wrap docs-layout">
           <aside class="docs-index">
             <p class="eyebrow accent-dark">On this page</p>
-            <a v-for="(item, index) in contents" :key="item[1]" :href="`#${item[1]}`"><span>{{ String(index + 1).padStart(2, '0') }}</span>{{ item[0] }}</a>
+            <a v-for="(item, index) in contents" :key="item[1]" :href="`#/docs/${item[1]}`"><span>{{ String(index + 1).padStart(2, '0') }}</span>{{ item[0] }}</a>
           </aside>
 
           <div class="docs-content">
@@ -208,7 +208,7 @@ const paperworkLinks = [
 
     <footer class="site-footer">
       <div class="wrap footer-grid">
-        <div><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span><span class="brand-word">lock<span>RH</span></span></a><p>Discounted bags, locked until the date.</p><p class="footer-chain">$LORH - Robinhood Chain</p></div>
+        <div><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span><span class="brand-word">lock<span>RH</span></span></a><p>Discounted bags, locked until the date.</p><p class="footer-chain">$LORH - Robinhood Chain</p></div>
         <nav aria-label="Hardware"><p class="footer-label">Hardware</p><a v-for="link in hardwareLinks" :key="link[0]" :href="link[1]">{{ link[0] }}</a></nav>
         <nav aria-label="Paperwork"><p class="footer-label">Paperwork</p><a v-for="link in paperworkLinks" :key="link[0]" :href="link[1]">{{ link[0] }}</a></nav>
       </div>

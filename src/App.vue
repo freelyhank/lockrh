@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -11,13 +11,38 @@ import {
 } from 'lucide-vue-next'
 import DocsPage from './Docs.vue'
 
+const DOCS_ROUTE = '#/docs'
+
+// Hash routing keeps the docs reachable on any static host: /#/docs, /#/docs/contracts.
+function readRoute() {
+  const path = window.location.hash.replace(/^#/, '').replace(/^\/+/, '')
+  if (path === 'docs' || path.startsWith('docs/')) {
+    return { name: 'docs', section: path.slice(4).replace(/^\/+/, '') }
+  }
+  return { name: 'home', section: path }
+}
+
+// Old /docs links (bookmarks, shared posts) are rewritten to the hash route before the app reads it.
+function legacyDocsTarget() {
+  const { pathname, hash } = window.location
+  if (!/\/docs\/?$/.test(pathname)) return null
+  const legacySection = hash.replace(/^#/, '').replace(/^\/+/, '')
+  const section = legacySection === 'docs' || legacySection.startsWith('docs/') ? '' : legacySection
+  return `${pathname.replace(/docs\/?$/, '')}${DOCS_ROUTE}${section ? `/${section}` : ''}`
+}
+
+const legacyTarget = legacyDocsTarget()
+if (legacyTarget) window.history.replaceState(null, '', legacyTarget)
+
+const route = ref(readRoute())
+const isDocs = computed(() => route.value.name === 'docs')
+
 const menuOpen = ref(false)
 const unlocked = ref(false)
 const discount = ref(25)
 const poolDepth = ref(20)
 const bagValue = ref(5)
 const lockLength = ref('7d')
-const isDocs = window.location.pathname === '/docs'
 let accordionMediaQuery
 let accordionCompact = false
 
@@ -125,6 +150,41 @@ function closeMenu() {
   menuOpen.value = false
 }
 
+function scrollPageToTop() {
+  const root = document.documentElement
+  root.style.scrollBehavior = 'auto'
+  window.scrollTo(0, 0)
+  requestAnimationFrame(() => { root.style.scrollBehavior = '' })
+}
+
+function scrollToSection(section, instant = false) {
+  const target = document.getElementById(section)
+  if (!target) return
+  const root = document.documentElement
+  if (instant) root.style.scrollBehavior = 'auto'
+  target.scrollIntoView({ block: 'start' })
+  if (instant) requestAnimationFrame(() => { root.style.scrollBehavior = '' })
+}
+
+function applyRoute() {
+  const previous = route.value
+  const next = readRoute()
+  if (previous.name === next.name && previous.section === next.section) return
+  route.value = next
+  const pageChanged = previous.name !== next.name
+  nextTick(() => {
+    if (next.name === 'docs') {
+      if (next.section) scrollToSection(next.section, pageChanged)
+      else if (pageChanged) scrollPageToTop()
+      return
+    }
+    // Home page anchors are handled by the browser; only a page switch loses the target element.
+    if (!pageChanged) return
+    if (next.section) scrollToSection(next.section, true)
+    else scrollPageToTop()
+  })
+}
+
 function handleMenuKeydown(event) {
   if (event.key === 'Escape') closeMenu()
 }
@@ -142,6 +202,7 @@ watch(menuOpen, (open) => {
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleMenuKeydown)
   document.body.style.overflow = ''
+  window.removeEventListener('hashchange', applyRoute)
   accordionMediaQuery?.removeEventListener?.('change', syncAccordionViewport)
 })
 
@@ -163,6 +224,8 @@ onMounted(() => {
   accordionMediaQuery = window.matchMedia('(max-width: 767px)')
   syncAccordionViewport()
   accordionMediaQuery.addEventListener?.('change', syncAccordionViewport)
+  window.addEventListener('hashchange', applyRoute)
+  if (isDocs.value && route.value.section) nextTick(() => scrollToSection(route.value.section, true))
 })
 </script>
 
@@ -177,7 +240,7 @@ onMounted(() => {
       </a>
       <nav class="desktop-nav" aria-label="Sections">
         <a v-for="item in navItems" :key="item[0]" :href="item[1]">{{ item[0] }}</a>
-        <a href="/docs">Docs</a>
+        <a href="#/docs">Docs</a>
       </nav>
       <div class="header-actions">
         <span class="live-pill"><i></i> Market live</span>
@@ -194,7 +257,7 @@ onMounted(() => {
     
     <nav>
       <a v-for="(item, index) in navItems" :key="item[0]" :href="item[1]" @click="closeMenu"><span class="menu-label">{{ item[0] }}</span><span class="menu-index"><b>{{ String(index + 1).padStart(2, '0') }}</b><LockKeyhole :size="14" /></span></a>
-      <a href="/docs" @click="closeMenu"><span class="menu-label">Docs</span><span class="menu-index"><b>06</b><LockKeyhole :size="14" /></span></a>
+      <a href="#/docs" @click="closeMenu"><span class="menu-label">Docs</span><span class="menu-index"><b>06</b><LockKeyhole :size="14" /></span></a>
     </nav>
     <p class="mobile-menu-note">$LORH · Robinhood Chain</p>
   </div>
@@ -208,7 +271,7 @@ onMounted(() => {
           <p class="hero-lede">Buy Robinhood Chain coins below the pool price. The tokens stay locked until a date you can see, and the locked position is yours to sell on.</p>
           <div class="hero-actions">
             <a class="button button-violet" href="#time-lock"><LockKeyhole :size="15" />See a deal lock</a>
-            <a class="button button-ghost" href="/docs">Read the docs</a>
+            <a class="button button-ghost" href="#/docs">Read the docs</a>
           </div>
         </div>
         <div class="hero-lock-wrap">
@@ -376,9 +439,9 @@ onMounted(() => {
 
     <section class="closing-image-band"><div class="closing-locks"><LockKeyhole v-for="n in 7" :key="n" :size="30" :style="{ '--n': n }" /></div><div class="wrap closing-image-copy"><p>Time is worth money, and a market can price it.</p><span>$LORH · Robinhood Chain</span></div></section>
 
-    <section id="app" class="cta-band"><div class="wrap cta-inner"><div><p class="eyebrow accent">$LORH · Robinhood Chain</p><h2>Lock in a discount.<br />The chart never notices.</h2><p>List a bag or buy one at the open market. Every number is public, every date is visible.</p></div><div class="cta-actions"><a class="button button-violet" href="#combination">Try the dial <ArrowDownRight :size="17" /></a><a class="button button-ghost" href="/docs">Read the docs</a></div></div></section>
+    <section id="app" class="cta-band"><div class="wrap cta-inner"><div><p class="eyebrow accent">$LORH · Robinhood Chain</p><h2>Lock in a discount.<br />The chart never notices.</h2><p>List a bag or buy one at the open market. Every number is public, every date is visible.</p></div><div class="cta-actions"><a class="button button-violet" href="#combination">Try the dial <ArrowDownRight :size="17" /></a><a class="button button-ghost" href="#/docs">Read the docs</a></div></div></section>
   </main>
 
-  <footer class="site-footer"><div class="wrap footer-grid"><div><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span><span class="brand-word">lock<span>RH</span></span></a><p>Discounted bags, locked until the date.</p><p class="footer-chain">$LORH · Robinhood Chain</p></div><div><p class="footer-label">Hardware</p><a v-for="item in navItems" :key="item[0]" :href="item[1]">{{ item[0] }}</a></div><div><p class="footer-label">Paperwork</p><a href="/docs">Docs</a><a href="#workings">Workings</a><a href="#spec-sheet">Spec sheet</a><a href="#weak-points">Weak points</a></div></div><div class="wrap footer-bottom"><p>Community-built. Not affiliated with any brokerage, launchpad or social network. $LORH is a utility token for the lockRH market, not a share or a claim on revenue. Nothing on this page is financial, legal or tax advice.</p><p>© 2026 lockRH</p></div></footer>
+  <footer class="site-footer"><div class="wrap footer-grid"><div><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span><span class="brand-word">lock<span>RH</span></span></a><p>Discounted bags, locked until the date.</p><p class="footer-chain">$LORH · Robinhood Chain</p></div><div><p class="footer-label">Hardware</p><a v-for="item in navItems" :key="item[0]" :href="item[1]">{{ item[0] }}</a></div><div><p class="footer-label">Paperwork</p><a href="#/docs">Docs</a><a href="#workings">Workings</a><a href="#spec-sheet">Spec sheet</a><a href="#weak-points">Weak points</a></div></div><div class="wrap footer-bottom"><p>Community-built. Not affiliated with any brokerage, launchpad or social network. $LORH is a utility token for the lockRH market, not a share or a claim on revenue. Nothing on this page is financial, legal or tax advice.</p><p>© 2026 lockRH</p></div></footer>
   </template>
 </template>
