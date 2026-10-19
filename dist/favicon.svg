@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="lockRH">
+  <title>lockRH</title>
+  <rect width="64" height="64" rx="14" fill="#8B5CF6" />
+  <g transform="translate(32 32) scale(0.88) translate(-35.75 -33.5)">
+    <g fill="none" stroke="#0C0B10" stroke-width="6.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15.5 17.5V49.5" />
+      <path d="M15.5 17.5h9.5a7.5 7.5 0 0 1 0 15h-9.5" />
+      <path d="M27 32.5 35.5 49.5" />
+      <path d="M43.5 17.5V49.5M56 17.5V49.5M43.5 33h12.5" />
+    </g>
+    <circle cx="25.6" cy="25" r="3.6" fill="#F3F1EC" />
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="11.9 13.9 47.7 39.2" role="img" aria-label="lockRH">
+  <title>lockRH mark, ink on light</title>
+  <g fill="none" stroke="#0C0B10" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15.5 17.5V49.5" />
+    <path d="M15.5 17.5h9.5a7.5 7.5 0 0 1 0 15h-9.5" />
+    <path d="M27 32.5 35.5 49.5" />
+    <path d="M43.5 17.5V49.5M56 17.5V49.5M43.5 33h12.5" />
+  </g>
+  <circle cx="25.6" cy="25" r="3.3" fill="#6C47E6" />
+</svg>
